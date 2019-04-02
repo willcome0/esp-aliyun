@@ -28,15 +28,28 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 
+// #ifdef CONFIG_TARGET_PLATFORM_ESP8266
+// #include "esp8266/gpio_register.h"
+// #include "esp8266/pin_mux_register.h"
+// #include "driver/pwm.h"
+// #else
 #include "driver/ledc.h"
+// #endif
 #include "esp_log.h"
 #include "light_control.h"
 
+// default:
+// GPIO4  ->  Red
+// GPIO5  ->  Green
+// GPIO21 ->  Blue
+#define LEDC_IO_0 (23) 
+#define LEDC_IO_1 (5)
 
-#define LEDC_IO_0 (4)    // 红
-#define LEDC_IO_1 (23)   // 绿
-#define LEDC_IO_2 (2)    // 蓝
-
+// #ifdef CONFIG_TARGET_PLATFORM_ESP8266
+//     #define LEDC_IO_2 (16)
+// #else
+    #define LEDC_IO_2 (21)
+// #endif
 
 #define PWM_DEPTH (1023)
 
@@ -61,18 +74,53 @@ void set_light_status(bool status)
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, status==0?0:(PWM_DEPTH-1));
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
 }
+// #ifdef CONFIG_TARGET_PLATFORM_ESP8266
+// #define PWM_PERIOD    (500)
+// #define PWM_IO_NUM    3
+
+// // pwm pin number
+// const uint32_t pin_num[PWM_IO_NUM] = {
+//     LEDC_IO_0,
+//     LEDC_IO_1,
+//     LEDC_IO_2
+// };
+
+// // dutys table, (duty/PERIOD)*depth
+// uint32_t duties[PWM_IO_NUM] = {
+//     250, 250, 250,
+// };
+
+// // phase table, (phase/180)*depth
+// int16_t phase[PWM_IO_NUM] = {
+//     0, 0, 50,
+// };
+
+// #define LEDC_CHANNEL_0 0
+// #define LEDC_CHANNEL_1 1
+// #define LEDC_CHANNEL_2 2
+
+// #endif
 
 /**
  * @brief transform lightbulb's "RGB" and other parameter
  */
 void lightbulb_set_aim(uint32_t r, uint32_t g, uint32_t b, uint32_t cw, uint32_t ww, uint32_t period)
 {
+// #ifdef CONFIG_TARGET_PLATFORM_ESP8266
+//     printf("lightbulb_set_aim r %d g %d b %d\r\n", r, g, b);
+//     pwm_stop(0x3);
+//     pwm_set_duty(LEDC_CHANNEL_0, r);
+//     pwm_set_duty(LEDC_CHANNEL_1, g);
+//     pwm_set_duty(LEDC_CHANNEL_2, b);
+//     pwm_start();
+// #else
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, r);
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, g);
     ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, b);
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1);
     ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2);
+// #endif
 }
 
 /**
@@ -181,7 +229,12 @@ static void lightbulb_update()
  */
 void lightbulb_init(void)
 {
-
+// #ifdef CONFIG_TARGET_PLATFORM_ESP8266
+//     pwm_init(PWM_PERIOD, duties, PWM_IO_NUM, pin_num);
+//     pwm_set_channel_invert(0x1 << 0);
+//     pwm_set_phases(phase);
+//     pwm_start();
+// #else
     // enable ledc module
     periph_module_enable(PERIPH_LEDC_MODULE);
 
@@ -237,10 +290,13 @@ void lightbulb_init(void)
  */
 void lightbulb_deinit(void)
 {
+// #ifdef CONFIG_TARGET_PLATFORM_ESP8266
+//     pwm_stop(0x3);
+// #else
     ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
     ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
     ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
-
+// #endif
 }
 
 /**

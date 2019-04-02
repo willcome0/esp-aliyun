@@ -19,10 +19,10 @@ static const char *TAG = "solo";
 #define USE_CUSTOME_DOMAIN (0)
 
 // for demo only
-#define PRODUCT_KEY "a1i35Bp8m5w"
-#define PRODUCT_SECRET "78WhxhY1Hhis5yqL"
-#define DEVICE_NAME "RGB-LED"
-#define DEVICE_SECRET "RTpmU7Oc3Zk9IuWvwiBGgFNeTVNegY5E"
+#define PRODUCT_KEY "a1y0bg1jCBS"
+#define PRODUCT_SECRET "tB1GZDwIeGNpav5q"
+#define DEVICE_NAME "Watch1"
+#define DEVICE_SECRET "mGQLNVMGaZpQKI9HImJFH8T5bUbx8TWY"
 
 #if USE_CUSTOME_DOMAIN
 #define CUSTOME_DOMAIN_MQTT "iot-as-mqtt.cn-shanghai.aliyuncs.com"
@@ -177,7 +177,7 @@ static void user_parse_cloud_cmd(const char *request, const int request_len)
 
     char *ptr = NULL;
     // TODO: parse it as fixed format JSON string
-    if (strstr(request, "LightSwitch") != NULL)
+    if (strstr(request, "LightStatus") != NULL)
     { // {"LightSwitch":0}    // 修改
         ptr = strstr(request, ":");
         ptr++;
@@ -185,34 +185,36 @@ static void user_parse_cloud_cmd(const char *request, const int request_len)
         LED_STATE = on;
         if (on)
         {
-            ESP_LOGI(TAG, "Set R:%d G:%d B:%d", s_rgb.r, s_rgb.g, s_rgb.b);
-            lightbulb_set_aim(s_rgb.r * PWM_TARGET_DUTY / 100, s_rgb.g * PWM_TARGET_DUTY / 100, s_rgb.b * PWM_TARGET_DUTY / 100, 0, 0, 0);
+            // ESP_LOGI(TAG, "Set R:%d G:%d B:%d", s_rgb.r, s_rgb.g, s_rgb.b);
+            // lightbulb_set_aim(s_rgb.r * PWM_TARGET_DUTY / 100, s_rgb.g * PWM_TARGET_DUTY / 100, s_rgb.b * PWM_TARGET_DUTY / 100, 0, 0, 0);
             ESP_LOGI(TAG, "LED ON！！！");
+            set_light_status(on);
         }
         else
         {
-            ESP_LOGI(TAG, "Set Light OFF");
-            lightbulb_set_aim(0, 0, 0, 0, 0, 0);
+            // ESP_LOGI(TAG, "Set Light OFF");
+            // lightbulb_set_aim(0, 0, 0, 0, 0, 0);
             ESP_LOGI(TAG, "LED OFF！！！");
+            set_light_status(on);
         }
     }
-    else if (strstr(request, "RGBColor") != NULL)
-    { // {"RGBColor":{"Red":120,"Blue":36,"Green":108}}
-        ptr = strstr(request, "Red");
-        ptr += 5;
-        s_rgb.r = atoi(ptr);
+    // else if (strstr(request, "RGBColor") != NULL)
+    // { // {"RGBColor":{"Red":120,"Blue":36,"Green":108}}
+    //     ptr = strstr(request, "Red");
+    //     ptr += 5;
+    //     s_rgb.r = atoi(ptr);
 
-        ptr = strstr(request, "Blue");
-        ptr += 6;
-        s_rgb.g = atoi(ptr);
+    //     ptr = strstr(request, "Blue");
+    //     ptr += 6;
+    //     s_rgb.g = atoi(ptr);
 
-        ptr = strstr(request, "Green");
-        ptr += 7;
-        s_rgb.b = atoi(ptr);
+    //     ptr = strstr(request, "Green");
+    //     ptr += 7;
+    //     s_rgb.b = atoi(ptr);
 
-        ESP_LOGI(TAG, "设置 R:%d G:%d B:%d", s_rgb.r, s_rgb.g, s_rgb.b);
-        lightbulb_set_aim(s_rgb.r * PWM_TARGET_DUTY / 100, s_rgb.g * PWM_TARGET_DUTY / 100, s_rgb.b * PWM_TARGET_DUTY / 100, 0, 0, 0);
-    }
+    //     ESP_LOGI(TAG, "Set R:%d G:%d B:%d", s_rgb.r, s_rgb.g, s_rgb.b);
+    //     lightbulb_set_aim(s_rgb.r * PWM_TARGET_DUTY / 100, s_rgb.g * PWM_TARGET_DUTY / 100, s_rgb.b * PWM_TARGET_DUTY / 100, 0, 0, 0);
+    // }
     else
     {
         ESP_LOGW(TAG, "不支持的命令");
@@ -768,6 +770,12 @@ int linkkit_main(void *paras)
     {
         IOT_Linkkit_Yield(USER_EXAMPLE_YIELD_TIMEOUT_MS);
 
+        TIME = user_update_sec();
+        if (TIME-LAST_TIME>5)
+        {
+            user_post_property();
+            LAST_TIME = TIME;
+        }
         
 #if 0
         time_now_sec = user_update_sec();
