@@ -550,6 +550,8 @@ int iotx_dm_fota_request_image(const char *version, int buffer_len)
 #endif
 }
 
+
+#define DEVICE_MODEL_GATEWAY
 #ifdef DEVICE_MODEL_GATEWAY
 int iotx_dm_query_topo_list(void)
 {

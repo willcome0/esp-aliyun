@@ -16,154 +16,115 @@
 #include "app_entry.h"
 
 #ifdef LINKKIT_GATEWAY_TEST_CMD
-    #include "simulate_subdev/testcmd.h"
+#include "simulate_subdev/testcmd.h"
 #endif
 
 #if defined(OTA_ENABLED) && defined(BUILD_AOS)
-    #include "ota_service.h"
+#include "ota_service.h"
 #endif
 
 // for demo only
-#define PRODUCT_KEY      "a1RIsMLz2BJ"
-#define PRODUCT_SECRET   "fSAF0hle6xL0oRWd"
-#define DEVICE_NAME      "example1"
-#define DEVICE_SECRET    "RDXf67itLqZCwdMCRrw0N5FHbv5D7jrE"
+#define PRODUCT_KEY "a1RIsMLz2BJ"
+#define PRODUCT_SECRET "fSAF0hle6xL0oRWd"
+#define DEVICE_NAME "example1"
+#define DEVICE_SECRET "RDXf67itLqZCwdMCRrw0N5FHbv5D7jrE"
 
 #define USER_EXAMPLE_YIELD_TIMEOUT_MS (200)
 
-#define EXAMPLE_TRACE(...) \
-    do { \
+#define EXAMPLE_TRACE(...)                                      \
+    do                                                          \
+    {                                                           \
         HAL_Printf("\033[1;32;40m%s.%d: ", __func__, __LINE__); \
-        HAL_Printf(__VA_ARGS__); \
-        HAL_Printf("\033[0m\r\n"); \
+        HAL_Printf(__VA_ARGS__);                                \
+        HAL_Printf("\033[0m\r\n");                              \
     } while (0)
 
-#define EXAMPLE_SUBDEV_ADD_NUM          3
-#define EXAMPLE_SUBDEV_MAX_NUM          20
+#define EXAMPLE_SUBDEV_ADD_NUM 3
+#define EXAMPLE_SUBDEV_MAX_NUM 20
 const iotx_linkkit_dev_meta_info_t subdevArr[EXAMPLE_SUBDEV_MAX_NUM] = {
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_01",
-        "qHLwZxOH5hwm0ApWVRXZbSxFzRUUddFc"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_02",
-        "jFsErM3uA7UfbS6J0hm0QaEXsQbmO6Pa"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_03",
-        "MjWMvCLBcuZyqUswryBbgypN8uOgJGVD"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_04",
-        "DXbcbpxepIyYm3BiS0ICdBou4uWPfP6L"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_05",
-        "VKuVZfcz3umcoR3WhOp4cu1p2dyTQGq1"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_06",
-        "QTobiz1BdGW5XNgLGIgNSylH0btVvvGS"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_07",
-        "IX7ol50rRS2uP8V74jt0DKfmYn8iC6h1"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_08",
-        "sbFxx62evXVoVgJ5gL2oCLcz1pX9d6K2"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_09",
-        "S0CpOl54GZxEO7Gz5DWQa5YxgUMfT4xA"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_10",
-        "MowJJjiNIkTdUcX5fCNUDu39Yz02KADL"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_11",
-        "BrJNdAihVznMWTpdRfe8HIiI95ubSYdN"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_12",
-        "Yd3ZHK8D6cAKKRQb9rUevCfwPf7atoQ4"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_13",
-        "d3HKvu2eBR5ytcgDaBEt0gpvJZlu9W0g"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_14",
-        "qAJYUpQ1tGmAINQBzMiZwwbyjY6YXDGc"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_15",
-        "GxgVknnAmUmwjjdHJf9dbEBDoqyDaUfp"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_16",
-        "9d17Sv05j1XeTYOs80UBpBU1OYTTJ58X"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_17",
-        "FTUm4HAfhZ5wH2u0pPn7PWcCLGDrgEfn"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_18",
-        "mF7a2ptc3PRi7jWLE92t0GElhGdPnAe3"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_19",
-        "Vrh8HuNvu3jtTEwSzulAjTqgOseAsVgz"
-    },
-    {
-        "a1YRfb9bepk",
-        "PKbZL7baK8pBso94",
-        "test_20",
-        "8Wxrxnjch6SW0s2HR5JkIBtgjt3BOUo7"
-    }
-};
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_01",
+     "qHLwZxOH5hwm0ApWVRXZbSxFzRUUddFc"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_02",
+     "jFsErM3uA7UfbS6J0hm0QaEXsQbmO6Pa"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_03",
+     "MjWMvCLBcuZyqUswryBbgypN8uOgJGVD"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_04",
+     "DXbcbpxepIyYm3BiS0ICdBou4uWPfP6L"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_05",
+     "VKuVZfcz3umcoR3WhOp4cu1p2dyTQGq1"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_06",
+     "QTobiz1BdGW5XNgLGIgNSylH0btVvvGS"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_07",
+     "IX7ol50rRS2uP8V74jt0DKfmYn8iC6h1"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_08",
+     "sbFxx62evXVoVgJ5gL2oCLcz1pX9d6K2"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_09",
+     "S0CpOl54GZxEO7Gz5DWQa5YxgUMfT4xA"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_10",
+     "MowJJjiNIkTdUcX5fCNUDu39Yz02KADL"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_11",
+     "BrJNdAihVznMWTpdRfe8HIiI95ubSYdN"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_12",
+     "Yd3ZHK8D6cAKKRQb9rUevCfwPf7atoQ4"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_13",
+     "d3HKvu2eBR5ytcgDaBEt0gpvJZlu9W0g"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_14",
+     "qAJYUpQ1tGmAINQBzMiZwwbyjY6YXDGc"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_15",
+     "GxgVknnAmUmwjjdHJf9dbEBDoqyDaUfp"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_16",
+     "9d17Sv05j1XeTYOs80UBpBU1OYTTJ58X"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_17",
+     "FTUm4HAfhZ5wH2u0pPn7PWcCLGDrgEfn"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_18",
+     "mF7a2ptc3PRi7jWLE92t0GElhGdPnAe3"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_19",
+     "Vrh8HuNvu3jtTEwSzulAjTqgOseAsVgz"},
+    {"a1YRfb9bepk",
+     "PKbZL7baK8pBso94",
+     "test_20",
+     "8Wxrxnjch6SW0s2HR5JkIBtgjt3BOUo7"}};
 
-typedef struct {
+typedef struct
+{
     int auto_add_subdev;
     int master_devid;
     int cloud_connected;
@@ -229,7 +190,7 @@ static int user_property_set_event_handler(const int devid, const char *request,
 }
 
 static int user_report_reply_event_handler(const int devid, const int msgid, const int code, const char *reply,
-        const int reply_len)
+                                           const int reply_len)
 {
     const char *reply_value = (reply == NULL) ? ("NULL") : (reply);
     const int reply_value_len = (reply_len == 0) ? (strlen("NULL")) : (reply_len);
@@ -252,7 +213,8 @@ static int user_initialized(const int devid)
     user_example_ctx_t *user_example_ctx = user_example_get_ctx();
     EXAMPLE_TRACE("Device Initialized, Devid: %d", devid);
 
-    if (user_example_ctx->master_devid == devid) {
+    if (user_example_ctx->master_devid == devid)
+    {
         user_example_ctx->master_initialized = 1;
         user_example_ctx->subdev_index++;
     }
@@ -264,7 +226,8 @@ static uint64_t user_update_sec(void)
 {
     static uint64_t time_start_ms = 0;
 
-    if (time_start_ms == 0) {
+    if (time_start_ms == 0)
+    {
         time_start_ms = HAL_UptimeMs();
     }
 
@@ -308,7 +271,8 @@ static int user_master_dev_available(void)
 {
     user_example_ctx_t *user_example_ctx = user_example_get_ctx();
 
-    if (user_example_ctx->cloud_connected && user_example_ctx->master_initialized) {
+    if (user_example_ctx->cloud_connected && user_example_ctx->master_initialized)
+    {
         return 1;
     }
 
@@ -323,25 +287,29 @@ void set_iotx_info()
     HAL_SetDeviceSecret(DEVICE_SECRET);
 }
 
+// 添加子设备
 static int example_add_subdev(iotx_linkkit_dev_meta_info_t *meta_info)
 {
     int res = 0, devid = -1;
     devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_SLAVE, meta_info);
-    if (devid == FAIL_RETURN) {
+    if (devid == FAIL_RETURN)
+    {
         EXAMPLE_TRACE("subdev open Failed\n");
         return FAIL_RETURN;
     }
     EXAMPLE_TRACE("subdev open susseed, devid = %d\n", devid);
 
     res = IOT_Linkkit_Connect(devid);
-    if (res == FAIL_RETURN) {
+    if (res == FAIL_RETURN)
+    {
         EXAMPLE_TRACE("subdev connect Failed\n");
         return res;
     }
     EXAMPLE_TRACE("subdev connect success: devid = %d\n", devid);
 
     res = IOT_Linkkit_Report(devid, ITM_MSG_LOGIN, NULL, 0);
-    if (res == FAIL_RETURN) {
+    if (res == FAIL_RETURN)
+    {
         EXAMPLE_TRACE("subdev login Failed\n");
         return res;
     }
@@ -364,7 +332,8 @@ void *user_dispatch_yield(void *args)
 {
     user_example_ctx_t *user_example_ctx = user_example_get_ctx();
 
-    while (user_example_ctx->g_user_dispatch_thread_running) {
+    while (user_example_ctx->g_user_dispatch_thread_running)
+    {
         IOT_Linkkit_Yield(USER_EXAMPLE_YIELD_TIMEOUT_MS);
     }
 
@@ -382,21 +351,25 @@ int linkkit_main(void *paras)
     memset(user_example_ctx, 0, sizeof(user_example_ctx_t));
 
 #if defined(__UBUNTU_SDK_DEMO__)
-    int                             argc = ((app_main_paras_t *)paras)->argc;
-    char                          **argv = ((app_main_paras_t *)paras)->argv;
+    int argc = ((app_main_paras_t *)paras)->argc;
+    char **argv = ((app_main_paras_t *)paras)->argv;
 
-    if (argc > 1) {
+    if (argc > 1)
+    {
         int tmp = atoi(argv[1]);
 
-        if (tmp >= 60) {
+        if (tmp >= 60)
+        {
             max_running_seconds = tmp;
             EXAMPLE_TRACE("set [max_running_seconds] = %d seconds\n", max_running_seconds);
         }
     }
 
-    if (argc > 2) {
+    if (argc > 2)
+    {
         if (strlen("auto") == strlen(argv[2]) &&
-            memcmp("auto", argv[2], strlen(argv[2])) == 0) {
+            memcmp("auto", argv[2], strlen(argv[2])) == 0)
+        {
             user_example_ctx->auto_add_subdev = 1;
         }
     }
@@ -427,7 +400,8 @@ int linkkit_main(void *paras)
 
     /* Create Master Device Resources */
     user_example_ctx->master_devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_MASTER, &master_meta_info);
-    if (user_example_ctx->master_devid < 0) {
+    if (user_example_ctx->master_devid < 0)
+    {
         EXAMPLE_TRACE("IOT_Linkkit_Open Failed\n");
         return -1;
     }
@@ -446,40 +420,50 @@ int linkkit_main(void *paras)
 
     /* Start Connect Aliyun Server */
     res = IOT_Linkkit_Connect(user_example_ctx->master_devid);
-    if (res < 0) {
+    if (res < 0)
+    {
         EXAMPLE_TRACE("IOT_Linkkit_Connect Failed\n");
         return -1;
     }
 
     user_example_ctx->g_user_dispatch_thread_running = 1;
     res = HAL_ThreadCreate(&user_example_ctx->g_user_dispatch_thread, user_dispatch_yield, NULL, NULL, NULL);
-    if (res < 0) {
+    if (res < 0)
+    {
         EXAMPLE_TRACE("HAL_ThreadCreate Failed\n");
         IOT_Linkkit_Close(user_example_ctx->master_devid);
         return -1;
     }
 
     time_begin_sec = user_update_sec();
-    while (1) {
+    while (1)
+    {
         HAL_SleepMs(200);
 
         time_now_sec = user_update_sec();
-        if (time_prev_sec == time_now_sec) {
+        if (time_prev_sec == time_now_sec)
+        {
             continue;
         }
-        if (max_running_seconds && (time_now_sec - time_begin_sec > max_running_seconds)) {
+        if (max_running_seconds && (time_now_sec - time_begin_sec > max_running_seconds))
+        {
             EXAMPLE_TRACE("Example Run for Over %d Seconds, Break Loop!\n", max_running_seconds);
             break;
         }
 
         /* Add subdev */
         if (user_example_ctx->master_initialized && user_example_ctx->subdev_index >= 0 &&
-            (user_example_ctx->auto_add_subdev == 1 || user_example_ctx->permit_join != 0)) {
-            if (user_example_ctx->subdev_index < EXAMPLE_SUBDEV_ADD_NUM) {
+            (user_example_ctx->auto_add_subdev == 1 || user_example_ctx->permit_join != 0))
+        {
+            if (user_example_ctx->subdev_index < EXAMPLE_SUBDEV_ADD_NUM)
+            {
                 /* Add next subdev */
-                if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdevArr[user_example_ctx->subdev_index]) == SUCCESS_RETURN) {
+                if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdevArr[user_example_ctx->subdev_index]) == SUCCESS_RETURN)
+                {
                     EXAMPLE_TRACE("subdev %s add succeed", subdevArr[user_example_ctx->subdev_index].device_name);
-                } else {
+                }
+                else
+                {
                     EXAMPLE_TRACE("subdev %s add failed", subdevArr[user_example_ctx->subdev_index].device_name);
                 }
                 user_example_ctx->subdev_index++;
@@ -488,17 +472,20 @@ int linkkit_main(void *paras)
         }
 
         /* Post Proprety Example */
-        if (time_now_sec % 11 == 0 && user_master_dev_available()) {
+        if (time_now_sec % 11 == 0 && user_master_dev_available())
+        {
             user_post_property();
         }
 
         /* Device Info Update Example */
-        if (time_now_sec % 23 == 0 && user_master_dev_available()) {
+        if (time_now_sec % 23 == 0 && user_master_dev_available())
+        {
             user_deviceinfo_update();
         }
 
         /* Device Info Delete Example */
-        if (time_now_sec % 29 == 0 && user_master_dev_available()) {
+        if (time_now_sec % 29 == 0 && user_master_dev_available())
+        {
             user_deviceinfo_delete();
         }
 

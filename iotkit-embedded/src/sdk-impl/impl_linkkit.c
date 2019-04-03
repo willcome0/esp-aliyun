@@ -2,6 +2,8 @@
  * Copyright (C) 2015-2018 Alibaba Group Holding Limited
  */
 
+#define DEVICE_MODEL_ENABLED
+#define DEVICE_MODEL_GATEWAY
 
 
 #if defined(DEVICE_MODEL_ENABLED) && !defined(DEPRECATED_LINKKIT)
@@ -850,11 +852,13 @@ static int _iotx_linkkit_slave_open(iotx_linkkit_dev_meta_info_t *meta_info)
     iotx_linkkit_ctx_t *ctx = _iotx_linkkit_get_ctx();
 
     if (!ctx->is_opened) {
+        printf("\r\n!子设备已打开\r\n");
         return FAIL_RETURN;
     }
 
     res = iotx_dm_subdev_create(meta_info->product_key, meta_info->device_name, meta_info->device_secret, &devid);
     if (res != SUCCESS_RETURN) {
+        printf("\r\n!子设备打开失败\r\n");
         return FAIL_RETURN;
     }
 
@@ -1059,6 +1063,7 @@ static int _iotx_linkkit_master_close(void)
 
     return SUCCESS_RETURN;
 }
+
 
 int IOT_Linkkit_Open(iotx_linkkit_dev_type_t dev_type, iotx_linkkit_dev_meta_info_t *meta_info)
 {
