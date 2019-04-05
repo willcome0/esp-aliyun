@@ -460,11 +460,11 @@ int linkkit_main(void *paras)
                 /* Add next subdev */
                 if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdevArr[user_example_ctx->subdev_index]) == SUCCESS_RETURN)
                 {
-                    EXAMPLE_TRACE("subdev %s add succeed", subdevArr[user_example_ctx->subdev_index].device_name);
+                    EXAMPLE_TRACE("设备 %s 添加成功", subdevArr[user_example_ctx->subdev_index].device_name);
                 }
                 else
                 {
-                    EXAMPLE_TRACE("subdev %s add failed", subdevArr[user_example_ctx->subdev_index].device_name);
+                    EXAMPLE_TRACE("设备 %s 添加失败", subdevArr[user_example_ctx->subdev_index].device_name);
                 }
                 user_example_ctx->subdev_index++;
                 user_example_ctx->permit_join = 0;

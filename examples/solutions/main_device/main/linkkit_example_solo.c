@@ -10,6 +10,7 @@
 #include "app_entry.h"
 #include "light_control.h"
 #include "esp_log.h"
+#include "iot_export_linkkit.h"
 
 #if defined(OTA_ENABLED) && defined(BUILD_AOS)
 #include "ota_service.h"
@@ -40,18 +41,19 @@ static const char *TAG = "solo";
     } while (0)
 
 
-const iotx_linkkit_dev_meta_info_t subdevArr = 
+const iotx_linkkit_dev_meta_info_t subdev = 
     {
-        "a1i35Bp8m5w",
-        "78WhxhY1Hhis5yqL",
-        "RGB-LED",
-        "RTpmU7Oc3Zk9IuWvwiBGgFNeTVNegY5E"
+        "a1vjaZ9ZGUx",
+        "RLOfJWbyHcLCN1vj",
+        "slave",
+        "4R0jJyO4ukQWoJMztsxLlwNd8IhBzAni"
     };
 
 // 添加子设备
 static int example_add_subdev(iotx_linkkit_dev_meta_info_t *meta_info)
 {
     int res = 0, devid = -1;
+    EXAMPLE_TRACE("子设备准备打开\n");
     devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_SLAVE, meta_info);
     if (devid == FAIL_RETURN) {
         EXAMPLE_TRACE("子设备打开失败\n");
@@ -538,11 +540,14 @@ static uint64_t user_update_sec(void)
 }
 #endif
 
+
+
 void user_post_property(void)
 {
     static int example_index = 0;
     int res = 0;
     user_example_ctx_t *user_example_ctx = user_example_get_ctx();
+    
     char *property_payload = "NULL";
 
     // if (example_index == 0)
@@ -600,12 +605,36 @@ void user_post_property(void)
     //     property_payload = "hello world";
     //     example_index = 0;
     // }
-
+    
     res = IOT_Linkkit_Report(user_example_ctx->master_devid, ITM_MSG_POST_PROPERTY,
                              (unsigned char *)property_payload, strlen(property_payload));
+    EXAMPLE_TRACE("主设备信息 ID: %d", res);
+    EXAMPLE_TRACE("主设备上报数据：%d", led_state);
 
-    EXAMPLE_TRACE("Post Property Message ID: %d", res);
-    EXAMPLE_TRACE("上报数据：%d", !LED_STATE);
+
+
+    
+    //     if (led_state)
+    //     {
+    //         property_payload = "{\"LightSwitch\":0}";
+    //         // set_light_status(0);
+    //     }
+    //     else
+    //     {
+    //         property_payload = "{\"LightSwitch\":1}";
+    //         // set_light_status(1);
+    //     }
+    // int devid = -1;
+    // devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_SLAVE, (iotx_linkkit_dev_meta_info_t *)&subdev);
+    // // devid = _iotx_linkkit_slave_open((iotx_linkkit_dev_meta_info_t *)&subdev);
+
+    // EXAMPLE_TRACE("子设备返回信息 ID: %d", devid);
+
+    // devid = 0;
+    // devid = IOT_Linkkit_Report(devid, ITM_MSG_POST_PROPERTY,
+    //                          (unsigned char *)property_payload, strlen(property_payload));
+    // EXAMPLE_TRACE("子设备强制信息 ID: %d", devid);
+    // EXAMPLE_TRACE("子设备上报数据：%d", led_state);
 }
 
 void user_post_event(void)
@@ -816,13 +845,13 @@ int linkkit_main(void *paras)
             if (1)
             {
                 /* Add next subdev */
-                if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdevArr) == SUCCESS_RETURN)
+                if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdev) == SUCCESS_RETURN)
                 {
-                    EXAMPLE_TRACE("subdev %s add succeed", subdevArr.device_name);
+                    EXAMPLE_TRACE("subdev %s add succeed", subdev.device_name);
                 }
                 else
                 {
-                    EXAMPLE_TRACE("subdev %s add failed", subdevArr.device_name);
+                    EXAMPLE_TRACE("subdev %s add failed", subdev.device_name);
                 }
             }
         }

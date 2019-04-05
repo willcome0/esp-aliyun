@@ -22,6 +22,10 @@
 #include "iotx_utils.h"
 #include "iotx_system.h"
 
+
+#define DEVICE_MODEL_ENABLED
+#define DEVICE_MODEL_GATEWAY
+
 #if defined(OTA_ENABLED) && !defined(BUILD_AOS)
     #include "iotx_ota.h"
 #endif

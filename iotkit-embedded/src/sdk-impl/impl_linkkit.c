@@ -5,8 +5,36 @@
 #define DEVICE_MODEL_ENABLED
 #define DEVICE_MODEL_GATEWAY
 
+// 添加
+#include "deprecated/solo.c"
+#include "stdio.h"
+#include "iot_export_linkkit.h"
+#include "cJSON.h"
+#include "app_entry.h"
+#include "light_control.h"
+#include "esp_log.h"
+
+#if defined(OTA_ENABLED) && defined(BUILD_AOS)
+#include "ota_service.h"
+#define EXAMPLE_TRACE(...)                                      \
+    do                                                          \
+    {                                                           \
+        HAL_Printf("\033[1;32;40m%s.%d: ", __func__, __LINE__); \
+        HAL_Printf(__VA_ARGS__);                                \
+        HAL_Printf("\033[0m\r\n");                              \
+    } while (0)
+// 结束
 
 #if defined(DEVICE_MODEL_ENABLED) && !defined(DEPRECATED_LINKKIT)
+
+#include "deprecated/solo.c"
+#include "stdio.h"
+#include "iot_export_linkkit.h"
+#include "cJSON.h"
+#include "app_entry.h"
+#include "light_control.h"
+#include "esp_log.h"
+
 
 #include "iot_export_linkkit.h"
 #include "sdk-impl_internal.h"
@@ -845,26 +873,28 @@ static int _iotx_linkkit_master_open(iotx_linkkit_dev_meta_info_t *meta_info)
     return SUCCESS_RETURN;
 }
 
-#ifdef DEVICE_MODEL_GATEWAY
+// #ifdef DEVICE_MODEL_GATEWAY
 static int _iotx_linkkit_slave_open(iotx_linkkit_dev_meta_info_t *meta_info)
 {
     int res = 0, devid;
     iotx_linkkit_ctx_t *ctx = _iotx_linkkit_get_ctx();
 
-    if (!ctx->is_opened) {
-        printf("\r\n!子设备已打开\r\n");
-        return FAIL_RETURN;
-    }
+    // if (!ctx->is_opened) {
+    //     HAL_Printf("\r\n主设备已连接\r\n");
+    //     return FAIL_RETURN;
+    // }
 
     res = iotx_dm_subdev_create(meta_info->product_key, meta_info->device_name, meta_info->device_secret, &devid);
     if (res != SUCCESS_RETURN) {
-        printf("\r\n!子设备打开失败\r\n");
-        return FAIL_RETURN;
+        HAL_Printf("\r\n子设备创建失败\r\n");
+        // return FAIL_RETURN;
+        return -9; // -2参数错误，-1
+
     }
 
-    return devid;
+    return -10;
 }
-#endif
+// #endif
 
 static int _iotx_linkkit_master_connect(void)
 {
@@ -1069,10 +1099,13 @@ int IOT_Linkkit_Open(iotx_linkkit_dev_type_t dev_type, iotx_linkkit_dev_meta_inf
 {
     int res = 0;
 
+    EXAMPLE_TRACE("判断参数\n");
     if (dev_type < 0 || dev_type >= IOTX_LINKKIT_DEV_TYPE_MAX || meta_info == NULL) {
         sdk_err("Invalid Parameter");
+        EXAMPLE_TRACE("无效的参数！dev_type：%d  name:%s\n", dev_type, meta_info->device_name);
         return FAIL_RETURN;
     }
+    EXAMPLE_TRACE("参数正常\n");
 
     switch (dev_type) {
         case IOTX_LINKKIT_DEV_TYPE_MASTER: {
@@ -1083,15 +1116,17 @@ int IOT_Linkkit_Open(iotx_linkkit_dev_type_t dev_type, iotx_linkkit_dev_meta_inf
         }
         break;
         case IOTX_LINKKIT_DEV_TYPE_SLAVE: {
-#ifdef DEVICE_MODEL_GATEWAY
+// #ifdef DEVICE_MODEL_GATEWAY
+            EXAMPLE_TRACE("子设备开始打开\n");
             res = _iotx_linkkit_slave_open(meta_info);
-#else
-            res = FAIL_RETURN;
-#endif
+// #else
+//             res = FAIL_RETURN;
+// #endif
         }
         break;
         default: {
             sdk_err("Unknown Device Type");
+            EXAMPLE_TRACE("未知的设备类型\n");
             res = FAIL_RETURN;
         }
         break;

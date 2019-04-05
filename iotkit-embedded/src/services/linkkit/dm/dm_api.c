@@ -578,18 +578,19 @@ int iotx_dm_subdev_create(_IN_ char product_key[PRODUCT_KEY_MAXLEN], _IN_ char d
         (strlen(product_key) >= PRODUCT_KEY_MAXLEN) ||
         (strlen(device_name) >= DEVICE_NAME_MAXLEN) ||
         devid == NULL) {
-        return DM_INVALID_PARAMETER;
+        return DM_INVALID_PARAMETER;    // 参数错误
     }
 
     if (device_secret != NULL && strlen(device_secret) >= DEVICE_SECRET_MAXLEN) {
-        return DM_INVALID_PARAMETER;
+        return DM_INVALID_PARAMETER;    // 参数错误
     }
 
     _dm_api_lock();
     res = dm_mgr_device_create(IOTX_DM_DEVICE_SUBDEV, product_key, device_name, device_secret, devid);
     if (res != SUCCESS_RETURN) {
         _dm_api_unlock();
-        return FAIL_RETURN;
+        // return FAIL_RETURN;
+        return -3;
     }
     _dm_api_unlock();
     return SUCCESS_RETURN;

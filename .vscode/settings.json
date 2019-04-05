@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "iotx_system.h": "c",
+        "iot_import.h": "c",
+        "iot_export.h": "c",
+        "report.h": "c",
+        "iotx_dm.h": "c",
+        "iotx_dm_internal.h": "c",
+        "iot_export_linkkit.h": "c",
+        "sdk-impl_internal.h": "c"
+    }
+}
