@@ -41,41 +41,44 @@ static const char *TAG = "solo";
     } while (0)
 
 
-const iotx_linkkit_dev_meta_info_t subdev = 
-    {
-        "a1vjaZ9ZGUx",
-        "RLOfJWbyHcLCN1vj",
-        "slave",
-        "4R0jJyO4ukQWoJMztsxLlwNd8IhBzAni"
-    };
+// const iotx_linkkit_dev_meta_info_t subdev = 
+//     {
+//         "a1vjaZ9ZGUx",
+//         "RLOfJWbyHcLCN1vj",
+//         "slave",
+//         "4R0jJyO4ukQWoJMztsxLlwNd8IhBzAni"
+//     };
 
-// 添加子设备
-static int example_add_subdev(iotx_linkkit_dev_meta_info_t *meta_info)
-{
-    int res = 0, devid = -1;
-    EXAMPLE_TRACE("子设备准备打开\n");
-    devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_SLAVE, meta_info);
-    if (devid == FAIL_RETURN) {
-        EXAMPLE_TRACE("子设备打开失败\n");
-        return FAIL_RETURN;
-    }
-    EXAMPLE_TRACE("子设备打开成功, devid = %d\n", devid);
+// // 添加子设备
+// static int example_add_subdev(iotx_linkkit_dev_meta_info_t *meta_info)
+// {
+//     int res = 0, devid = -1;
+//     EXAMPLE_TRACE("子设备准备打开\n");
+//     devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_SLAVE, meta_info);
+//     if (devid == FAIL_RETURN) {
+//         EXAMPLE_TRACE("子设备打开失败\n");
+//         return FAIL_RETURN;
+//     }
+//     EXAMPLE_TRACE("子设备打开成功, devid = %d\n", devid);
 
-    res = IOT_Linkkit_Connect(devid);
-    if (res == FAIL_RETURN) {
-        EXAMPLE_TRACE("子设备连接失败\n");
-        return res;
-    }
-    EXAMPLE_TRACE("子设备连接成功，devid = %d\n", devid);
+//     res = IOT_Linkkit_Connect(devid);
+//     if (res == FAIL_RETURN) {
+//         EXAMPLE_TRACE("子设备连接失败\n");
+//         return res;
+//     }
+//     EXAMPLE_TRACE("子设备连接成功，devid = %d\n", devid);
 
-    res = IOT_Linkkit_Report(devid, ITM_MSG_LOGIN, NULL, 0);
-    if (res == FAIL_RETURN) {
-        EXAMPLE_TRACE("子设备登陆失败\n");
-        return res;
-    }
-    EXAMPLE_TRACE("子设备登陆成功，devid = %d\n", devid);
-    return res;
-}
+//     res = IOT_Linkkit_Report(devid, ITM_MSG_LOGIN, NULL, 0);
+//     if (res == FAIL_RETURN) {
+//         EXAMPLE_TRACE("子设备登陆失败\n");
+//         return res;
+//     }
+//     EXAMPLE_TRACE("子设备登陆成功，devid = %d\n", devid);
+//     return res;
+// }
+
+
+
 
 
 typedef struct
@@ -750,21 +753,21 @@ int linkkit_main(void *paras)
     int res = 0;
     iotx_linkkit_dev_meta_info_t master_meta_info;
     user_example_ctx_t *user_example_ctx = user_example_get_ctx();
-#if defined(__UBUNTU_SDK_DEMO__)
-    int argc = ((app_main_paras_t *)paras)->argc;
-    char **argv = ((app_main_paras_t *)paras)->argv;
+// #if defined(__UBUNTU_SDK_DEMO__)
+//     int argc = ((app_main_paras_t *)paras)->argc;
+//     char **argv = ((app_main_paras_t *)paras)->argv;
 
-    if (argc > 1)
-    {
-        int tmp = atoi(argv[1]);
+//     if (argc > 1)
+//     {
+//         int tmp = atoi(argv[1]);
 
-        if (tmp >= 60)
-        {
-            max_running_seconds = tmp;
-            EXAMPLE_TRACE("set [max_running_seconds] = %d seconds\n", max_running_seconds);
-        }
-    }
-#endif
+//         if (tmp >= 60)
+//         {
+//             max_running_seconds = tmp;
+//             EXAMPLE_TRACE("set [max_running_seconds] = %d seconds\n", max_running_seconds);
+//         }
+//     }
+// #endif
 
 #if !defined(WIFI_PROVISION_ENABLED) || !defined(BUILD_AOS)
     set_iotx_info();
@@ -774,7 +777,7 @@ int linkkit_main(void *paras)
 
     IOT_SetLogLevel(IOT_LOG_DEBUG);
 
-    /* Register Callback */
+    /* 注册回调函数 */
     IOT_RegisterCallback(ITE_CONNECT_SUCC, user_connected_event_handler);
     IOT_RegisterCallback(ITE_DISCONNECTED, user_disconnected_event_handler);
     IOT_RegisterCallback(ITE_RAWDATA_ARRIVED, user_down_raw_data_arrived_event_handler);
@@ -795,13 +798,13 @@ int linkkit_main(void *paras)
     memcpy(master_meta_info.device_secret, DEVICE_SECRET, strlen(DEVICE_SECRET));
 
     /* Choose Login Server, domain should be configured before IOT_Linkkit_Open() */
-#if USE_CUSTOME_DOMAIN
-    IOT_Ioctl(IOTX_IOCTL_SET_MQTT_DOMAIN, (void *)CUSTOME_DOMAIN_MQTT);
-    IOT_Ioctl(IOTX_IOCTL_SET_HTTP_DOMAIN, (void *)CUSTOME_DOMAIN_HTTP);
-#else
+// #if USE_CUSTOME_DOMAIN
+//     IOT_Ioctl(IOTX_IOCTL_SET_MQTT_DOMAIN, (void *)CUSTOME_DOMAIN_MQTT);
+//     IOT_Ioctl(IOTX_IOCTL_SET_HTTP_DOMAIN, (void *)CUSTOME_DOMAIN_HTTP);
+// #else
     int domain_type = IOTX_CLOUD_REGION_SHANGHAI;
     IOT_Ioctl(IOTX_IOCTL_SET_DOMAIN, (void *)&domain_type);
-#endif
+// #endif
 
     /* Choose Login Method */
     int dynamic_register = 0;
@@ -811,7 +814,7 @@ int linkkit_main(void *paras)
     int post_event_reply = 1;
     IOT_Ioctl(IOTX_IOCTL_RECV_EVENT_REPLY, (void *)&post_event_reply);
 
-    /* Create Master Device Resources */
+    /* 创建主设备资源 */
     user_example_ctx->master_devid = IOT_Linkkit_Open(IOTX_LINKKIT_DEV_TYPE_MASTER, &master_meta_info);
     if (user_example_ctx->master_devid < 0)
     {
@@ -820,7 +823,7 @@ int linkkit_main(void *paras)
         return -1;
     }
 
-    /* Start Connect Aliyun Server */
+    /* 开始连接阿里云服务器 */
     res = IOT_Linkkit_Connect(user_example_ctx->master_devid);
     if (res < 0)
     {
@@ -828,6 +831,8 @@ int linkkit_main(void *paras)
         IOT_Linkkit_Close(user_example_ctx->master_devid);
         return -1;
     }
+
+
 
     // time_begin_sec = user_update_sec();
     static uint32_t TIME;
@@ -842,18 +847,18 @@ int linkkit_main(void *paras)
             user_post_property();
             LAST_TIME = TIME;
 
-            if (1)
-            {
-                /* Add next subdev */
-                if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdev) == SUCCESS_RETURN)
-                {
-                    EXAMPLE_TRACE("subdev %s add succeed", subdev.device_name);
-                }
-                else
-                {
-                    EXAMPLE_TRACE("subdev %s add failed", subdev.device_name);
-                }
-            }
+            // if (0)
+            // {
+            //     /* Add next subdev */
+            //     if (example_add_subdev((iotx_linkkit_dev_meta_info_t *)&subdev) == SUCCESS_RETURN)
+            //     {
+            //         EXAMPLE_TRACE("subdev %s add succeed", subdev.device_name);
+            //     }
+            //     else
+            //     {
+            //         EXAMPLE_TRACE("subdev %s add failed", subdev.device_name);
+            //     }
+            // }
         }
         
 
