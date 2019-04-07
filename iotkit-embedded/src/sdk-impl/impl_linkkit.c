@@ -906,27 +906,35 @@ static int _iotx_linkkit_master_connect(void)
         return FAIL_RETURN;
     }
     ctx->is_connected = 1;
+    ESP_LOGI("_iotx_linkkit_master_connect内部--", "参数正确");
 
     memset(&dm_init_params, 0, sizeof(iotx_dm_init_params_t));
     dm_init_params.event_callback = _iotx_linkkit_event_callback;
 
+    ESP_LOGI("_iotx_linkkit_master_connect内部--", "开始连接");
     res = iotx_dm_connect(&dm_init_params);
     if (res != SUCCESS_RETURN) {
+        ESP_LOGI("_iotx_linkkit_master_connect内部--", "连接失败");
         sdk_err("DM Start Failed");
         ctx->is_connected = 0;
         return FAIL_RETURN;
     }
+    ESP_LOGI("_iotx_linkkit_master_connect内部--", "连接成功，开始订阅");
 
+    
     res = iotx_dm_subscribe(IOTX_DM_LOCAL_NODE_DEVID);
     if (res != SUCCESS_RETURN) {
+        ESP_LOGI("_iotx_linkkit_master_connect内部--", "订阅失败");
         sdk_err("DM Subscribe Failed");
         ctx->is_connected = 0;
         return FAIL_RETURN;
     }
+    ESP_LOGI("_iotx_linkkit_master_connect内部--", "订阅成功");
 
     iotx_dm_event_types_t type = IOTX_DM_EVENT_INITIALIZED;
+    ESP_LOGI("_iotx_linkkit_master_connect内部--", "回调");
     _iotx_linkkit_event_callback(type, "{\"devid\":0}");
-
+    ESP_LOGI("_iotx_linkkit_master_connect内部--", "全部完成");
     return SUCCESS_RETURN;
 }
 
@@ -1137,6 +1145,7 @@ int IOT_Linkkit_Open(iotx_linkkit_dev_type_t dev_type, iotx_linkkit_dev_meta_inf
 
 int IOT_Linkkit_Connect(int devid)
 {
+    ESP_LOGI("函数内部--", "进入函数");
     int res = 0;
     iotx_linkkit_ctx_t *ctx = _iotx_linkkit_get_ctx();
 
@@ -1150,18 +1159,25 @@ int IOT_Linkkit_Connect(int devid)
         return FAIL_RETURN;
     }
 
+    ESP_LOGI("函数内部--", "连参数正确");
+
     _iotx_linkkit_mutex_lock();
 
+    ESP_LOGI("函数内部--", "上锁完成");
+
     if (devid == IOTX_DM_LOCAL_NODE_DEVID) {
+        ESP_LOGI("函数内部--", "主设备开始连接");
         res = _iotx_linkkit_master_connect();
     } else {
 #ifdef DEVICE_MODEL_GATEWAY
+        ESP_LOGI("函数内部--", "从设备开始连接");
         res = _iotx_linkkit_slave_connect(devid);
 #else
         res = FAIL_RETURN;
 #endif
     }
     _iotx_linkkit_mutex_unlock();
+    ESP_LOGI("函数内部--", "开锁完成");
 
     return res;
 }
