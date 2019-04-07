@@ -47,10 +47,14 @@ static const char *TAG = "my";
 /*****************MQTT相关***********************/
 #define TOPIC_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update"
 #define TOPIC_DATA "/" PRODUCT_KEY "/" DEVICE_NAME "/user/data"
-#define TOPIC_PROPERTY_SET "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/post"
+#define TOPIC_ENENT_PROPERTY_POST "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/post"
 #define ALINK_BODY_FORMAT "{\"id\":\"123\",\"version\":\"1.0\",\"method\":\"thing.event.property.post\",\"params\":%s}"
 
 #define MQTT_MSGLEN (1024)
+
+
+void *g_p_mqtt_client;
+
 
 static int user_argc;
 static char **user_argv;
@@ -1265,9 +1269,9 @@ int linkkit_main(void *paras)
     mqtt_params.handle_event.pcontext = NULL;
 
     /* Construct a MQTT client with specify parameter */
-    void *pclient;
-    pclient = IOT_MQTT_Construct(&mqtt_params);
-    if (NULL == pclient)
+    
+    g_p_mqtt_client = IOT_MQTT_Construct(&mqtt_params);
+    if (NULL == g_p_mqtt_client)
     {
         ESP_LOGI("#my", "MQTT构建失败");
         return -1;
@@ -1286,10 +1290,10 @@ int linkkit_main(void *paras)
     topic_msg.payload = (void *)msg_pub;
     topic_msg.payload_len = strlen(msg_pub);
 
-    rc = IOT_MQTT_Publish(pclient, TOPIC_UPDATE, &topic_msg);
+    rc = IOT_MQTT_Publish(g_p_mqtt_client, TOPIC_UPDATE, &topic_msg);
     if (rc < 0)
     {
-        IOT_MQTT_Destroy(&pclient);
+        IOT_MQTT_Destroy(&g_p_mqtt_client);
         ESP_LOGI("#MQTT--", "发送消息时发生错误");
         return -1;
     }
@@ -1297,15 +1301,15 @@ int linkkit_main(void *paras)
 
     /*********************订阅主题**********************************/
     ESP_LOGI("#MQTT--", "订阅主题：%s", TOPIC_DATA);
-    rc = IOT_MQTT_Subscribe(pclient, TOPIC_DATA, IOTX_MQTT_QOS1, _demo_message_arrive, NULL);
+    rc = IOT_MQTT_Subscribe(g_p_mqtt_client, TOPIC_DATA, IOTX_MQTT_QOS1, _demo_message_arrive, NULL);
     if (rc < 0)
     {
-        IOT_MQTT_Destroy(&pclient);
+        IOT_MQTT_Destroy(&g_p_mqtt_client);
         ESP_LOGI("#MQTT--", "主题订阅失败，返回值为%d", rc);
         return -1;
     }
 
-    IOT_MQTT_Yield(pclient, 200);
+    IOT_MQTT_Yield(g_p_mqtt_client, 200);
 
     HAL_SleepMs(2000);
 
@@ -1320,9 +1324,9 @@ int linkkit_main(void *paras)
     topic_msg.payload = (void *)msg_pub;
     topic_msg.payload_len = strlen(msg_pub);
 
-    rc = IOT_MQTT_Publish(pclient, TOPIC_DATA, &topic_msg);
+    rc = IOT_MQTT_Publish(g_p_mqtt_client, TOPIC_DATA, &topic_msg);
     ESP_LOGI("#MQTT--", "主题名：%s\n 载荷数据：%s\n 返回值：%d", TOPIC_DATA, topic_msg.payload, rc);
-    IOT_MQTT_Yield(pclient, 200);
+    IOT_MQTT_Yield(g_p_mqtt_client, 200);
 
 
 
@@ -1397,7 +1401,7 @@ int linkkit_main(void *paras)
         topic_msg.payload = (void *)msg_pub;    // 发送的消息
         topic_msg.payload_len = msg_len;        // 消息长度
 
-        rc = IOT_MQTT_Publish(pclient, TOPIC_DATA, &topic_msg);
+        rc = IOT_MQTT_Publish(g_p_mqtt_client, TOPIC_DATA, &topic_msg);
         if (rc < 0)
         {
             ESP_LOGI("#循环--", "发送消息时发生错误");
@@ -1406,7 +1410,7 @@ int linkkit_main(void *paras)
         ESP_LOGI("#循环--", "载荷数据：%s", msg_pub);
 
         /* handle the MQTT packet received from TCP or SSL connection */
-        IOT_MQTT_Yield(pclient, 3000);
+        IOT_MQTT_Yield(g_p_mqtt_client, 3000);
 
         /* infinite loop if running with 'loop' argument */
         if (user_argc >= 2 && !strcmp("loop", user_argv[1]))
@@ -1446,14 +1450,14 @@ int linkkit_main(void *paras)
         topic_msg.payload = (void *)msg_pub;
         topic_msg.payload_len = strlen(msg_pub);
 
-        rc = IOT_MQTT_Publish(pclient, TOPIC_PROPERTY_SET, &topic_msg);
+        rc = IOT_MQTT_Publish(g_p_mqtt_client, TOPIC_ENENT_PROPERTY_POST, &topic_msg);
         if (rc < 0)
         {
-            IOT_MQTT_Destroy(&pclient);
+            IOT_MQTT_Destroy(&g_p_mqtt_client);
             ESP_LOGI("#MQTT--", "发送消息时发生错误");
             return -1;
         }
-        ESP_LOGI("#MQTT--", "主题名：%s\n 载荷数据：%s\n 返回值：%d", TOPIC_PROPERTY_SET, topic_msg.payload, rc);
+        ESP_LOGI("#MQTT--", "主题名：%s\n 载荷数据：%s\n 返回值：%d", TOPIC_ENENT_PROPERTY_POST, topic_msg.payload, rc);
     }
             // user_post_property();
             
