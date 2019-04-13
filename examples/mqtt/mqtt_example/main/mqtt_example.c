@@ -1,7 +1,3 @@
-/*
- * Copyright (C) 2015-2018 Alibaba Group Holding Limited
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,9 +17,10 @@
 
 /* These are pre-defined topics */
 #define TOPIC_UPDATE "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update"
-// #define TOPIC_ERROR "/" PRODUCT_KEY "/" DEVICE_NAME "/user/update/error"
-// #define TOPIC_GET "/" PRODUCT_KEY "/" DEVICE_NAME "/user/get"
 #define TOPIC_DATA "/" PRODUCT_KEY "/" DEVICE_NAME "/user/data"
+#define TOPIC_ENENT_PROPERTY_POST "/sys/" PRODUCT_KEY "/" DEVICE_NAME "/thing/event/property/post"
+#define ALINK_BODY_FORMAT "{\"id\":\"123\",\"version\":\"1.0\",\"method\":\"thing.event.property.post\",\"params\":%s}"
+
 
 #define MQTT_MSGLEN (1024)
 
@@ -33,7 +30,7 @@ static int user_argc;
 static char **user_argv;
 
 
-void event_handle(void *pcontext, void *pclient, iotx_mqtt_event_msg_pt msg)
+void mqtt_event_handle(void *pcontext, void *pclient, iotx_mqtt_event_msg_pt msg)
 {
     uintptr_t packet_id = (uintptr_t)msg->msg;
     iotx_mqtt_topic_info_pt topic_info = (iotx_mqtt_topic_info_pt)msg->msg;
@@ -93,11 +90,9 @@ void event_handle(void *pcontext, void *pclient, iotx_mqtt_event_msg_pt msg)
         break;
 
     case IOTX_MQTT_EVENT_PUBLISH_RECEIVED:
-        ESP_LOGI("#事件回调--", "主题消息到达但没有任何相关句柄：\r\n主题=%.*s, 主题数据=%.*s",
-                      topic_info->topic_len,
-                      topic_info->ptopic,
-                      topic_info->payload_len,
-                      topic_info->payload);
+        ESP_LOGI("#事件回调--", "主题消息到达但没有任何相关句柄：");
+        ESP_LOGI("#事件回调--", "主题=%.*s", topic_info->topic_len, topic_info->ptopic);
+        ESP_LOGI("#事件回调--", "主题数据=%.*s", topic_info->payload_len, topic_info->payload);       
         break;
 
     case IOTX_MQTT_EVENT_BUFFER_OVERFLOW:
@@ -172,7 +167,7 @@ int mqtt_client(void)
     mqtt_params.read_buf_size = MQTT_MSGLEN;
     mqtt_params.write_buf_size = MQTT_MSGLEN;
 
-    mqtt_params.handle_event.h_fp = event_handle;
+    mqtt_params.handle_event.h_fp = mqtt_event_handle;
     mqtt_params.handle_event.pcontext = NULL;
 
     /* Construct a MQTT client with specify parameter */
@@ -260,6 +255,38 @@ int mqtt_client(void)
         }
         ESP_LOGI("#循环--", "信息包：ID%u", (uint32_t)rc);
         ESP_LOGI("#循环--", "载荷数据：%s", msg_pub);
+
+
+/******************************************************/
+    {
+        memset(&topic_msg, 0x0, sizeof(iotx_mqtt_topic_info_t));
+        if (cnt%2)
+        {
+            sprintf(msg_pub, ALINK_BODY_FORMAT, "{\"LightStatus\":1}");
+        }
+        else
+        {
+            sprintf(msg_pub, ALINK_BODY_FORMAT, "{\"LightStatus\":0}");
+        }
+
+        topic_msg.qos = IOTX_MQTT_QOS1;
+        topic_msg.retain = 0;
+        topic_msg.dup = 0;
+        topic_msg.payload = (void *)msg_pub;
+        topic_msg.payload_len = strlen(msg_pub);
+
+        rc = IOT_MQTT_Publish(g_p_mqtt_client, TOPIC_ENENT_PROPERTY_POST, &topic_msg);
+        if (rc < 0)
+        {
+            IOT_MQTT_Destroy(&g_p_mqtt_client);
+            ESP_LOGI("#MQTT--", "发送消息时发生错误");
+            return -1;
+        }
+        ESP_LOGI("#MQTT--", "主题名：%s\n 载荷数据：%s\n 返回值：%d", TOPIC_ENENT_PROPERTY_POST, topic_msg.payload, rc);
+    }
+
+
+
 
         /* handle the MQTT packet received from TCP or SSL connection */
         IOT_MQTT_Yield(pclient, 3000);
